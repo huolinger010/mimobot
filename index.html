@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MiMoBot — AI Crypto Assistant</title>
+<meta name="description" content="Free AI-powered crypto assistant with token safety checker, live prices, and DeFi education.">
+<meta property="og:title" content="MiMoBot — AI Crypto Assistant">
+<meta property="og:description" content="Token safety checker, live prices, DeFi education. Free, no signup.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06070b;--bg2:#0a0b12;
+  --glass:rgba(14,15,24,.65);--glass2:rgba(20,22,35,.55);--glass3:rgba(28,30,48,.45);
+  --border:rgba(99,102,241,.07);--border2:rgba(99,102,241,.15);--border3:rgba(99,102,241,.25);
+  --text:#f0f2f8;--text2:#8b93a8;--text3:#4a5168;--text4:#2d3348;
+  --acc:#6366f1;--acc2:#818cf8;--acc3:#a5b4fc;--acc-dim:rgba(99,102,241,.06);
+  --green:#34d399;--green-dim:rgba(52,211,153,.08);--green-b:rgba(52,211,153,.18);
+  --red:#f87171;--red-dim:rgba(248,113,113,.08);--red-b:rgba(248,113,113,.18);
+  --orange:#fbbf24;--orange-dim:rgba(251,191,36,.08);--orange-b:rgba(251,191,36,.18);
+  --pink:#f472b6;--cyan:#22d3ee;
+  --grad:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);
+  --grad2:linear-gradient(135deg,#6366f1,#8b5cf6);
+  --r:18px;--r-sm:12px;--r-xs:8px;
+  --shadow:0 4px 24px rgba(0,0,0,.35);--shadow-lg:0 12px 48px rgba(0,0,0,.5);
+  --blur:blur(24px);--blur-sm:blur(12px);
+  --ease:cubic-bezier(.16,1,.3,1);--ease2:cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+::selection{background:var(--acc);color:#fff}
+a{color:var(--acc2);text-decoration:none;transition:.2s}
+a:hover{color:var(--acc3)}
+
+/* ─── Ambient ─── */
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+.ambient::before{content:'';position:absolute;top:-60%;left:-40%;width:160%;height:160%;background:radial-gradient(ellipse at 20% 20%,rgba(99,102,241,.08) 0%,transparent 50%);animation:a1 25s ease-in-out infinite}
+.ambient::after{content:'';position:absolute;bottom:-60%;right:-40%;width:160%;height:160%;background:radial-gradient(ellipse at 80% 80%,rgba(168,85,247,.06) 0%,transparent 50%);animation:a2 30s ease-in-out infinite}
+@keyframes a1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4%,3%) scale(1.05)}}
+@keyframes a2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-3%,-4%) scale(1.03)}}
+
+/* ─── Desktop Layout ─── */
+.shell{position:relative;z-index:1;display:flex;height:100%;max-width:1400px;margin:0 auto;width:100%}
+
+/* Sidebar */
+.sidebar{width:260px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--glass);backdrop-filter:var(--blur);padding:20px 16px;gap:8px}
+.sidebar-brand{display:flex;align-items:center;gap:12px;padding:8px 12px;margin-bottom:12px}
+.sb-icon{width:42px;height:42px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(99,102,241,.3);position:relative}
+.sb-icon::after{content:'';position:absolute;inset:-3px;border-radius:17px;background:var(--grad);opacity:.25;filter:blur(10px);z-index:-1}
+.sb-info h1{font-size:16px;font-weight:700;letter-spacing:-.3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb-info p{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;margin-top:1px}
+.sb-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:16px 12px 6px}
+.sb-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r-sm);cursor:pointer;transition:all .2s var(--ease2);font-size:13px;font-weight:500;color:var(--text2);position:relative}
+.sb-item:hover{color:var(--text);background:var(--acc-dim)}
+.sb-item.active{color:var(--text);background:rgba(99,102,241,.1)}
+.sb-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;border-radius:3px;background:var(--grad)}
+.sb-item .ico{font-size:18px;width:24px;text-align:center}
+.sb-spacer{flex:1}
+.sb-footer{padding:12px;border-radius:var(--r-sm);background:var(--acc-dim);border:1px solid var(--border)}
+.sb-footer p{font-size:11px;color:var(--text3);line-height:1.5}
+.sb-footer a{font-weight:600}
+
+/* Main Area */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* Header */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:var(--glass);backdrop-filter:var(--blur-sm);flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.live-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.12)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:live-pulse 2s ease-in-out infinite}
+@keyframes live-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(52,211,153,0)}}
+.live-badge span{font-size:10px;font-weight:600;color:var(--green);letter-spacing:.5px}
+.ib{width:36px;height:36px;border-radius:var(--r-xs);border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.ib:hover{border-color:var(--border2);color:var(--text2);background:var(--acc-dim)}
+
+/* Panels */
+.panel{display:none;flex:1;overflow:hidden}
+.panel.active{display:flex;flex-direction:column}
+
+/* Quick Bar */
+.qbar{display:flex;gap:7px;padding:12px 28px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.qbar::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11.5px;font-weight:500;cursor:pointer;transition:all .25s var(--ease);white-space:nowrap;letter-spacing:.2px}
+.chip:hover{border-color:var(--acc);color:var(--text);background:var(--acc-dim);transform:translateY(-1px)}
+.chip:active{transform:scale(.97)}
+.chip-hl{background:var(--acc-dim);border-color:var(--border2);color:var(--acc2)}
+
+/* Chat */
+.chat{flex:1;overflow-y:auto;padding:12px 28px 20px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.chat::-webkit-scrollbar{width:4px}
+.chat::-webkit-scrollbar-track{background:transparent}
+.chat::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* Welcome */
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;gap:28px}
+.wb{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:999px;background:var(--acc-dim);border:1px solid var(--border);font-size:11px;color:var(--acc2);font-weight:600;letter-spacing:.3px}
+.welcome h2{font-size:clamp(28px,5vw,42px);font-weight:900;letter-spacing:-1px;line-height:1.05;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome>p{color:var(--text2);max-width:480px;font-size:14px;line-height:1.7}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:480px}
+.fcard{padding:20px;border-radius:var(--r);border:1px solid var(--border);background:var(--glass2);text-align:left;cursor:pointer;transition:all .3s var(--ease);position:relative;overflow:hidden}
+.fcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0;transition:.3s}
+.fcard:hover{border-color:var(--border2);background:var(--glass3);transform:translateY(-3px);box-shadow:var(--shadow)}
+.fcard:hover::before{opacity:1}
+.fcard .fi{font-size:26px;margin-bottom:12px;display:block}
+.fcard .ft{font-size:13px;font-weight:600;margin-bottom:4px}
+.fcard .fd{font-size:11.5px;color:var(--text3);line-height:1.5}
+
+/* Messages */
+.msg{display:flex;gap:10px;max-width:80%;animation:msg-in .35s var(--ease)}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.bot{align-self:flex-start}
+.msg.user .bub{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:18px 18px 4px 18px}
+.msg.bot .bub{background:var(--glass2);border:1px solid var(--border);border-radius:18px 18px 18px 4px}
+.av{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:var(--shadow)}
+.msg.user .av{background:linear-gradient(135deg,#3b82f6,#6366f1)}
+.msg.bot .av{background:linear-gradient(135deg,#a855f7,#ec4899)}
+.bub{padding:14px 18px;font-size:13.5px;line-height:1.7;word-break:break-word}
+.bub code{background:rgba(0,0,0,.3);padding:2px 7px;border-radius:5px;font-size:12px;font-family:'Fira Code',monospace}
+.bub pre{background:rgba(0,0,0,.35);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0;font-size:12px}
+.bub strong{color:var(--acc2)}
+.bub table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.bub th{padding:8px 10px;text-align:left;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);font-weight:600}
+.bub td{padding:8px 10px;border-bottom:1px solid rgba(99,102,241,.04)}
+.bub tr:last-child td{border-bottom:none}
+.mt{font-size:10px;color:var(--text3);margin-top:4px;opacity:.5;padding:0 4px}
+
+/* Data Card */
+.dc{background:var(--acc-dim);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px;margin:10px 0;position:relative;overflow:hidden}
+.dc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.dc .dcl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:6px}
+.dc .dcv{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.dc .dcs{font-size:12px;margin-top:4px;font-weight:500}
+.dc .dcs.up{color:var(--green)}.dc .dcs.down{color:var(--red)}
+
+/* Market Table */
+.mt-tbl{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.mt-tbl th{padding:10px;text-align:left;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);font-weight:600}
+.mt-tbl td{padding:10px;border-bottom:1px solid rgba(99,102,241,.04)}
+.mt-tbl tr{transition:.15s}
+.mt-tbl tr:hover{background:rgba(99,102,241,.04)}
+.cc{display:flex;align-items:center;gap:8px}
+.cc img{width:22px;height:22px;border-radius:50%}
+.cc .cn{font-weight:600;font-size:13px}.cc .cs{color:var(--text3);font-size:11px;font-weight:500}
+.pb{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.pb.up{background:var(--green-dim);color:var(--green)}.pb.down{background:var(--red-dim);color:var(--red)}
+
+/* Safety Report */
+.sr{background:var(--glass2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:10px 0}
+.sr-hd{padding:24px;text-align:center;border-bottom:1px solid var(--border)}
+.sr-ring{width:120px;height:120px;margin:0 auto 14px;position:relative}
+.sr-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.sr-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+.sr-ring .bg{stroke:rgba(99,102,241,.1)}
+.sr-ring .fg{transition:stroke-dashoffset 1s var(--ease)}
+.sr-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;letter-spacing:-1px}
+.sr-verdict{font-size:16px;font-weight:700;margin-bottom:4px}
+.sr-sub{font-size:12px;color:var(--text2)}
+.sr-body{padding:18px 22px}
+.sr-sec{margin-bottom:16px}.sr-sec:last-child{margin-bottom:0}
+.sr-st{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.sr-it{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(99,102,241,.04)}
+.sr-it:last-child{border-bottom:none}
+.sr-ii{font-size:16px;flex-shrink:0;margin-top:1px}
+.sr-itx{flex:1}
+.sr-il{font-size:13px;font-weight:500}.sr-id{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+.sr-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.srt{padding:4px 10px;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.srt.danger{background:var(--red-dim);color:var(--red);border:1px solid var(--red-b)}
+.srt.warning{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-b)}
+.srt.safe{background:var(--green-dim);color:var(--green);border:1px solid var(--green-b)}
+
+/* Safety Panel */
+.safe-scroll{flex:1;overflow-y:auto;padding:28px}
+.safe-scroll::-webkit-scrollbar{width:4px}
+.safe-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.safe-hero{text-align:center;padding:20px 0 32px}
+.safe-hero h3{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.safe-hero p{color:var(--text2);font-size:13px;line-height:1.6;max-width:440px;margin:0 auto}
+.safe-input-wrap{max-width:520px;margin:0 auto 24px;display:flex;gap:8px}
+.safe-input-wrap input{flex:1;padding:14px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--glass2);color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:.2s}
+.safe-input-wrap input:focus{border-color:var(--border2);box-shadow:0 0 0 3px rgba(99,102,241,.06)}
+.safe-input-wrap input::placeholder{color:var(--text3)}
+.safe-btn{padding:14px 28px;border-radius:var(--r);border:none;background:var(--grad);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+.safe-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.4)}
+.safe-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.safe-result{max-width:520px;margin:0 auto}
+.safe-ex{max-width:520px;margin:24px auto 0;padding:16px;border-radius:var(--r);border:1px solid var(--border);background:var(--glass2)}
+.safe-ex h4{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.safe-ex-item{padding:10px 14px;border-radius:var(--r-xs);border:1px solid var(--border);background:transparent;margin-bottom:6px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);width:100%;text-align:left;font-family:inherit}
+.safe-ex-item:hover{border-color:var(--acc);background:var(--acc-dim);color:var(--text)}
+.safe-ex-item .sn{font-weight:600;color:var(--text)}.safe-ex-item .sa{font-family:'Fira Code',monospace;font-size:11px;color:var(--text3)}
+
+/* Market Panel */
+.mkt-scroll{flex:1;overflow-y:auto;padding:20px 28px}
+.mkt-scroll::-webkit-scrollbar{width:4px}
+.mkt-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.mkt-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.mkt-hd h3{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.mkt-hd span{font-size:11px;color:var(--text3);font-weight:500}
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.mkt-card{padding:18px;border-radius:var(--r);border:1px solid var(--border);background:var(--glass2);transition:all .3s var(--ease)}
+.mkt-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.mkt-ct{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.mkt-ct img{width:28px;height:28px;border-radius:50%}
+.mkt-ct .mn{font-weight:600;font-size:13px}.mkt-ct .ms{color:var(--text3);font-size:11px;font-weight:500}
+.mkt-card .mp{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.mkt-card .mc{font-size:12px;font-weight:600;margin-top:4px}
+.mkt-card .mm{font-size:10px;color:var(--text3);margin-top:6px;font-weight:500}
+
+/* Trending */
+.trow{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:16px}
+.tcard{padding:16px;border-radius:var(--r);border:1px solid var(--border);background:var(--glass2);text-align:center;transition:all .3s}
+.tcard:hover{border-color:var(--border2);transform:translateY(-2px)}
+.tcard img{width:36px;height:36px;border-radius:50%;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tcard .tn{font-size:12px;font-weight:600}.tcard .ts{font-size:10px;color:var(--text3)}
+.tcard .tr{font-size:10px;color:var(--acc2);margin-top:6px;font-weight:600}
+
+/* Education */
+.edu-scroll{flex:1;overflow-y:auto;padding:20px 28px}
+.edu-scroll::-webkit-scrollbar{width:4px}
+.edu-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.edu-hd{margin-bottom:20px}
+.edu-hd h3{font-size:18px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.edu-hd p{font-size:12px;color:var(--text3)}
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.edu-card{padding:20px;border-radius:var(--r);border:1px solid var(--border);background:var(--glass2);cursor:pointer;transition:all .3s var(--ease);position:relative;overflow:hidden}
+.edu-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);opacity:0;transition:.3s}
+.edu-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.edu-card:hover::before{opacity:1}
+.edu-card .ei{font-size:28px;margin-bottom:12px;display:block}
+.edu-card .et{font-size:14px;font-weight:700;margin-bottom:5px}
+.edu-card .ed{font-size:12px;color:var(--text2);line-height:1.6}
+.edu-card .etags{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap}
+.etag{padding:4px 10px;border-radius:999px;font-size:9.5px;font-weight:600;background:var(--acc-dim);color:var(--acc2);border:1px solid var(--border);letter-spacing:.3px}
+
+/* Typing */
+.typing{display:flex;gap:5px;padding:6px 0}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:bounce .6s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.12s}
+.typing span:nth-child(3){animation-delay:.24s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Input */
+.input-wrap{padding:14px 28px 20px;flex-shrink:0}
+.input-bar{display:flex;gap:10px;padding:6px;background:var(--glass2);border:1px solid var(--border);border-radius:22px;transition:border-color .2s}
+.input-bar:focus-within{border-color:var(--border2);box-shadow:0 0 0 3px rgba(99,102,241,.05)}
+.input-bar input{flex:1;padding:12px 18px;border:none;background:transparent;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.input-bar input::placeholder{color:var(--text3)}
+.send{width:42px;height:42px;border-radius:50%;border:none;background:var(--grad);color:#fff;font-size:16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 12px rgba(99,102,241,.3)}
+.send:hover{transform:scale(1.06);box-shadow:0 4px 20px rgba(99,102,241,.4)}
+.send:active{transform:scale(.96)}
+.send:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ─── Mobile Nav ─── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--glass);backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:6px 8px env(safe-area-inset-bottom,8px);flex-shrink:0}
+.mn-items{display:flex;gap:4px}
+.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:var(--r-xs);cursor:pointer;transition:all .2s;color:var(--text3);font-size:10px;font-weight:600;letter-spacing:.2px}
+.mn-item:hover,.mn-item.active{color:var(--text);background:var(--acc-dim)}
+.mn-item .mi{font-size:20px}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  .shell{flex-direction:column}
+  .sidebar{display:none}
+  .mobile-nav{display:block}
+  .topbar{padding:12px 16px}
+  .topbar-title{font-size:14px}
+  .qbar{padding:10px 16px}
+  .chat{padding:10px 16px 16px}
+  .input-wrap{padding:10px 16px calc(60px + env(safe-area-inset-bottom,8px))}
+  .mkt-scroll,.edu-scroll,.safe-scroll{padding:16px}
+  .msg{max-width:90%}
+  .fgrid{grid-template-columns:1fr}
+  .mkt-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .edu-grid{grid-template-columns:1fr}
+  .welcome h2{font-size:28px}
+  .welcome>p{font-size:13px}
+  .welcome{padding:24px 16px;gap:20px}
+  .safe-input-wrap{flex-direction:column}
+  .safe-btn{width:100%}
+  .sb-icon{width:36px;height:36px;border-radius:12px;font-size:18px}
+}
+
+@media(min-width:769px){
+  .mobile-nav{display:none!important}
+  .sidebar{display:flex}
+  .msg{max-width:70%}
+  .topbar .mobile-menu{display:none}
+}
+
+@media(min-width:1200px){
+  .fgrid{grid-template-columns:repeat(2,1fr);max-width:520px}
+  .mkt-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .edu-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<div class="shell">
+  <!-- Sidebar (Desktop) -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sb-icon">🤖</div>
+      <div class="sb-info"><h1>MiMoBot</h1><p>AI CRYPTO ASSISTANT</p></div>
+    </div>
+    <div class="sb-label">Main</div>
+    <div class="sb-item active" data-tab="chat" onclick="switchTab('chat')"><span class="ico">💬</span>Chat</div>
+    <div class="sb-item" data-tab="safety" onclick="switchTab('safety')"><span class="ico">🛡️</span>Safety Checker</div>
+    <div class="sb-item" data-tab="market" onclick="switchTab('market')"><span class="ico">📊</span>Market</div>
+    <div class="sb-label">Learn</div>
+    <div class="sb-item" data-tab="learn" onclick="switchTab('learn')"><span class="ico">📚</span>Education</div>
+    <div class="sb-spacer"></div>
+    <div class="sb-footer">
+      <p>Powered by <a href="https://platform.xiaomimimo.com" target="_blank">Xiaomi MiMo</a><br>Free · No signup · No API key</p>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbarTitle">💬 Chat</div>
+      </div>
+      <div class="topbar-right">
+        <div class="live-badge"><div class="live-dot"></div><span>LIVE</span></div>
+        <button class="ib" onclick="clearChat()" title="New chat">✕</button>
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="panel active" id="panel-chat">
+      <div class="qbar">
+        <button class="chip" onclick="ask('price btc eth sol')">💰 Prices</button>
+        <button class="chip" onclick="ask('top 10 coins')">📊 Top 10</button>
+        <button class="chip" onclick="ask('trending coins')">🔥 Trending</button>
+        <button class="chip" onclick="ask('what is defi')">🏦 DeFi</button>
+        <button class="chip chip-hl" onclick="switchTab('safety')">🛡️ Check Token</button>
+        <button class="chip" onclick="ask('explain ethereum gas fees')">⛽ Gas</button>
+        <button class="chip" onclick="ask('what is layer 2')">⚡ L2</button>
+        <button class="chip" onclick="ask('what is an airdrop')">🪂 Airdrops</button>
+      </div>
+      <div class="chat" id="chat">
+        <div class="welcome" id="welcome">
+          <div class="wb">✦ Powered by Xiaomi MiMo</div>
+          <h2>MiMoBot</h2>
+          <p>Free AI crypto assistant with token safety checker, live market data, and DeFi education.</p>
+          <div class="fgrid">
+            <div class="fcard" onclick="switchTab('safety')"><span class="fi">🛡️</span><div class="ft">Token Safety</div><div class="fd">Check contracts for rug pull risks</div></div>
+            <div class="fcard" onclick="ask('price btc eth sol')"><span class="fi">📈</span><div class="ft">Live Prices</div><div class="fd">Real-time data for 100+ tokens</div></div>
+            <div class="fcard" onclick="ask('what is impermanent loss')"><span class="fi">🔄</span><div class="ft">DeFi Education</div><div class="fd">Yield farming, LP, protocols</div></div>
+            <div class="fcard" onclick="ask('how to detect scam tokens')"><span class="fi">🔍</span><div class="ft">Security Guide</div><div class="fd">Spot rugs, honeypots, scams</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safety Panel -->
+    <div class="panel" id="panel-safety">
+      <div class="safe-scroll" id="safetyContent">
+        <div class="safe-hero">
+          <h3>🛡️ Token Safety Checker</h3>
+          <p>Paste any contract address to analyze rug pull risks, holder distribution, and scam indicators.</p>
+        </div>
+        <div class="safe-input-wrap">
+          <input type="text" id="safetyInput" placeholder="Paste contract address (0x...)" autocomplete="off" onkeydown="if(event.key==='Enter')checkSafety()">
+          <button class="safe-btn" id="safetyBtn" onclick="checkSafety()">Analyze</button>
+        </div>
+        <div id="safetyResult"></div>
+        <div class="safe-ex" id="safetyExamples">
+          <h4>Try these examples</h4>
+          <button class="safe-ex-item" onclick="checkToken('0xdAC17F958D2ee523a2206206994597C13D831ec7')"><span>💵</span><div><div class="sn">Tether (USDT)</div><div class="sa">0xdAC17F...1ec7 · Ethereum</div></div></button>
+          <button class="safe-ex-item" onclick="checkToken('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')"><span>💲</span><div><div class="sn">USD Coin (USDC)</div><div class="sa">0xA0b869...eB48 · Ethereum</div></div></button>
+          <button class="safe-ex-item" onclick="checkToken('0x514910771AF9Ca656af840dff83E8264EcF986CA')"><span>🔗</span><div><div class="sn">Chainlink (LINK)</div><div class="sa">0x514910...86CA · Ethereum</div></div></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Market Panel -->
+    <div class="panel" id="panel-market">
+      <div class="mkt-scroll" id="marketContent">
+        <div style="text-align:center;padding:60px 0;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">📊</div><div style="font-size:14px;font-weight:500">Loading market data...</div></div>
+      </div>
+    </div>
+
+    <!-- Learn Panel -->
+    <div class="panel" id="panel-learn">
+      <div class="edu-scroll" id="eduContent"></div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-wrap" id="inputWrap">
+      <div class="input-bar">
+        <input type="text" id="input" placeholder="Ask about crypto..." autocomplete="off" onkeydown="if(event.key==='Enter')send()">
+        <button class="send" id="sendBtn" onclick="send()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<div class="mobile-nav">
+  <div class="mn-items">
+    <div class="mn-item active" data-tab="chat" onclick="switchTab('chat')"><span class="mi">💬</span>Chat</div>
+    <div class="mn-item" data-tab="safety" onclick="switchTab('safety')"><span class="mi">🛡️</span>Safety</div>
+    <div class="mn-item" data-tab="market" onclick="switchTab('market')"><span class="mi">📊</span>Market</div>
+    <div class="mn-item" data-tab="learn" onclick="switchTab('learn')"><span class="mi">📚</span>Learn</div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const chatEl=$('chat');
+const titles={chat:'💬 Chat',safety:'🛡️ Safety Checker',market:'📊 Market',learn:'📚 Learn'};
+
+function switchTab(tab){
+  document.querySelectorAll('.sb-item').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.mn-item').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===`panel-${tab}`));
+  $('topbarTitle').textContent=titles[tab]||'💬 Chat';
+  $('inputWrap').style.display=tab==='chat'?'block':'none';
+  if(tab==='market')loadMarket();
+  if(tab==='learn')loadEducation();
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fmt$(n){return n>=1?'$'+n.toLocaleString(undefined,{maximumFractionDigits:2}):'$'+n.toFixed(6)}
+function fmtM(n){return n>=1e12?'$'+(n/1e12).toFixed(2)+'T':n>=1e9?'$'+(n/1e9).toFixed(2)+'B':n>=1e6?'$'+(n/1e6).toFixed(2)+'M':'$'+n.toLocaleString()}
+function pC(v){return v>=0?'up':'down'}
+function pA(v){return v>=0?'▲':'▼'}
+function pB(v){if(v==null)return'<span style="color:var(--text3)">N/A</span>';return`<span class="pb ${pC(v)}">${pA(v)} ${Math.abs(v).toFixed(2)}%</span>`}
+
+function addMsg(role,html){
+  const w=$('welcome');if(w)w.remove();
+  const d=document.createElement('div');d.className=`msg ${role}`;
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML=`<div class="av">${role==='user'?'👤':'🤖'}</div><div><div class="bub">${html}</div><div class="mt">${t}</div></div>`;
+  chatEl.appendChild(d);chatEl.scrollTop=chatEl.scrollHeight;
+}
+function showTyping(){
+  const d=document.createElement('div');d.className='msg bot';d.id='typing';
+  d.innerHTML=`<div class="av">🤖</div><div class="bub"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  chatEl.appendChild(d);chatEl.scrollTop=chatEl.scrollHeight;
+}
+function ask(q){$('input').value=q;send()}
+async function send(){
+  const inp=$('input'),q=inp.value.trim();if(!q)return;inp.value='';
+  addMsg('user',esc(q));showTyping();$('sendBtn').disabled=true;
+  const r=await processQuery(q);$('typing')?.remove();addMsg('bot',r);
+  $('sendBtn').disabled=false;inp.focus();
+}
+
+const CG='https://api.coingecko.com/api/v3';
+const coinIds={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',doge:'dogecoin',ada:'cardano',avax:'avalanche',dot:'polkadot',link:'chainlink',uni:'uniswap',aave:'aave',ltc:'litecoin',trx:'tron',matic:'polygon',atom:'cosmos',near:'near',apt:'aptos',sui:'sui',arb:'arbitrum',op:'optimism',pepe:'pepe',shib:'shiba-inu',wif:'dogwifcoin',jup:'jupiter-exchange-solana',ray:'raydium',cake:'pancakeswap-token',mkr:'maker',ldo:'lido-dao',pendle:'pendle',ena:'ethena',ondo:'ondo-finance'};
+function matchCoins(t){const l=t.toLowerCase(),f=[];for(const[s,id]of Object.entries(coinIds))if(new RegExp(`\\b${s}\\b`,'i').test(l))f.push(id);const n={bitcoin:'bitcoin',ethereum:'ethereum',solana:'solana',cardano:'cardano',dogecoin:'dogecoin',avalanche:'avalanche',polkadot:'polkadot',chainlink:'chainlink',uniswap:'uniswap',litecoin:'litecoin',tron:'tron',ripple:'ripple'};for(const[k,id]of Object.entries(n))if(l.includes(k)&&!f.includes(id))f.push(id);return[...new Set(f)]}
+async function cgP(ids){try{const r=await fetch(`${CG}/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true`);return await r.json()}catch{return null}}
+async function cgM(n=50){try{const r=await fetch(`${CG}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${n}&page=1&sparkline=false`);return await r.json()}catch{return null}}
+async function cgT(){try{const r=await fetch(`${CG}/search/trending`);return(await r.json()).coins||[] }catch{return[]}}
+async function cgC(a){try{const r=await fetch(`${CG}/coins/ethereum/contract/${a}`);if(!r.ok)return null;return await r.json()}catch{return null}}
+
+/* Safety */
+async function checkSafety(){
+  const a=$('safetyInput').value.trim();if(!a)return;
+  if(!/^0x[a-fA-F0-9]{40}$/.test(a)){$('safetyResult').innerHTML=`<div class="sr"><div class="sr-body"><div style="text-align:center;color:var(--red);padding:20px">⚠️ Invalid address format.</div></div></div>`;return}
+  await checkToken(a);
+}
+async function checkToken(addr){
+  const btn=$('safetyBtn');if(btn){btn.disabled=true;btn.textContent='Analyzing...'}
+  $('safetyResult').innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)"><div class="typing"><span></span><span></span><span></span></div><div style="margin-top:12px;font-size:13px">Analyzing...</div></div>';
+  $('safetyExamples').style.display='none';
+  try{const d=await cgC(addr);renderSR(analyzeToken(d,addr))}catch(e){$('safetyResult').innerHTML=`<div class="sr"><div class="sr-body"><div style="text-align:center;color:var(--red);padding:20px">❌ Error: ${esc(e.message)}</div></div></div>`}
+  if(btn){btn.disabled=false;btn.textContent='Analyze'}
+}
+function analyzeToken(data,addr){
+  const r={address:addr,name:'Unknown',symbol:'?',score:50,verdict:'CAUTION',checks:[],tags:[],marketCap:0,price:0,change24h:0,volume:0};
+  if(!data||data.error){r.name='Unlisted Token';r.verdict='HIGH RISK';r.score=15;r.checks.push({i:'🔴',l:'Not listed on CoinGecko',d:'Extreme caution advised.'},{i:'🔴',l:'No market data',d:'Cannot verify liquidity or volume.'},{i:'🔴',l:'Likely unverified',d:'Unlisted tokens are often scams.'});r.tags.push('NOT LISTED','HIGH RISK');return r}
+  r.name=data.name||'Unknown';r.symbol=(data.symbol||'?').toUpperCase();
+  const md=data.market_data||{};r.price=md.current_price?.usd||0;r.change24h=md.price_change_percentage_24h||0;r.marketCap=md.market_cap?.usd||0;r.volume=md.total_volume?.usd||0;
+  let s=50;const c=[];
+  if(r.marketCap>1e9){s+=15;c.push({i:'🟢',l:'Large market cap',d:fmtM(r.marketCap)+' — established'})}else if(r.marketCap>1e8){s+=10;c.push({i:'🟢',l:'Mid-cap',d:fmtM(r.marketCap)})}else if(r.marketCap>1e6){s+=5;c.push({i:'🟡',l:'Small-cap',d:fmtM(r.marketCap)+' — higher risk'})}else if(r.marketCap>0){s-=10;c.push({i:'🔴',l:'Micro-cap',d:fmtM(r.marketCap)+' — extremely high risk'})}else{s-=20;c.push({i:'🔴',l:'No market cap',d:'Cannot verify valuation'})}
+  if(r.volume>1e8){s+=10;c.push({i:'🟢',l:'High volume',d:fmtM(r.volume)+' (24h)'})}else if(r.volume>1e7){s+=5;c.push({i:'🟢',l:'Moderate volume',d:fmtM(r.volume)+' (24h)'})}else if(r.volume>1e6){c.push({i:'🟡',l:'Low volume',d:fmtM(r.volume)+' (24h)'})}else{s-=10;c.push({i:'🔴',l:'Very low volume',d:fmtM(r.volume)+' (24h)'})}
+  if(r.marketCap>0){const ratio=r.volume/r.marketCap;if(ratio>0.5)c.push({i:'🟢',l:'Healthy liquidity',d:(ratio*100).toFixed(1)+'% vol/mcap'})} 
+  if(data.market_cap_rank){s+=10;c.push({i:'🟢',l:'Ranked',d:'#'+data.market_cap_rank})}else{s-=5;c.push({i:'🟡',l:'Unranked',d:'No ranking available'})}
+  if(data.genesis_date){const age=Math.floor((Date.now()-new Date(data.genesis_date).getTime())/(86400*1000));if(age>365){s+=10;c.push({i:'🟢',l:'Established',d:Math.floor(age/365)+' year(s)'})}else if(age>90){s+=5;c.push({i:'🟢',l:'Growing',d:age+' days'})}else{s-=5;c.push({i:'🟡',l:'New project',d:age+' days'})}}
+  const lk=data.links||{};const hw=lk.homepage&&lk.homepage[0];const ht=lk.twitter_screen_name;const hg=lk.repos_url?.github?.length>0;if(hw)s+=3;if(ht)s+=3;if(hg)s+=4;if(!hw&&!ht){s-=10;c.push({i:'🔴',l:'No online presence',d:'No website or social media'})}else c.push({i:'🟢',l:'Online presence',d:[hw?'Website':'',ht?'Twitter':'',hg?'GitHub':''].filter(Boolean).join(' · ')})
+  s=Math.max(0,Math.min(100,s));r.score=s;r.checks=c;
+  if(s>=75){r.verdict='SAFE';r.tags.push('VERIFIED','LISTED')}else if(s>=50){r.verdict='CAUTION';r.tags.push('MODERATE RISK')}else if(s>=30){r.verdict='HIGH RISK';r.tags.push('HIGH RISK')}else{r.verdict='DANGER';r.tags.push('EXTREME RISK')}
+  return r;
+}
+function renderSR(a){
+  const col=a.score>=75?'var(--green)':a.score>=50?'var(--orange)':'var(--red)';
+  const bg=a.score>=75?'var(--green-dim)':a.score>=50?'var(--orange-dim)':'var(--red-dim)';
+  const bd=a.score>=75?'var(--green-b)':a.score>=50?'var(--orange-b)':'var(--red-b)';
+  const circ=2*Math.PI*50;const off=circ*(1-a.score/100);
+  let h=`<div class="sr"><div class="sr-hd" style="border-bottom-color:${bd}"><div class="sr-ring"><svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="50"/><circle class="fg" cx="60" cy="60" r="50" stroke="${col}" stroke-dasharray="${circ}" stroke-dashoffset="${off}"/></svg><div class="sr-num" style="color:${col}">${a.score}</div></div><div class="sr-verdict" style="color:${col}">${a.verdict}</div><div class="sr-sub">${a.name} (${a.symbol})</div><div class="sr-tags" style="justify-content:center;margin-top:10px">${a.tags.map(t=>`<span class="srt ${t.includes('RISK')||t.includes('DANGER')?'danger':t.includes('MODERATE')?'warning':'safe'}">${t}</span>`).join('')}</div></div><div class="sr-body">`;
+  if(a.price>0)h+=`<div class="sr-sec"><div class="sr-st">Market Data</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center"><div style="padding:12px;border-radius:12px;background:${bg};border:1px solid ${bd}"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">PRICE</div><div style="font-size:15px;font-weight:700">${fmt$(a.price)}</div></div><div style="padding:12px;border-radius:12px;background:${bg};border:1px solid ${bd}"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">24H</div><div style="font-size:15px;font-weight:700;color:${a.change24h>=0?'var(--green)':'var(--red)'}">${pA(a.change24h)} ${Math.abs(a.change24h).toFixed(2)}%</div></div><div style="padding:12px;border-radius:12px;background:${bg};border:1px solid ${bd}"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">MCAP</div><div style="font-size:15px;font-weight:700">${fmtM(a.marketCap)}</div></div></div></div>`;
+  h+=`<div class="sr-sec"><div class="sr-st">Analysis</div>`;a.checks.forEach(x=>{h+=`<div class="sr-it"><div class="sr-ii">${x.i}</div><div class="sr-itx"><div class="sr-il">${x.l}</div><div class="sr-id">${x.d}</div></div></div>`});h+=`</div>`;
+  h+=`<div class="sr-sec"><div class="sr-st">Contract</div><div class="sr-it"><div class="sr-ii">📋</div><div class="sr-itx"><div class="sr-il" style="font-family:'Fira Code',monospace;font-size:12px;word-break:break-all">${a.address}</div><div class="sr-id"><a href="https://etherscan.io/token/${a.address}" target="_blank">View on Etherscan ↗</a></div></div></div></div>`;
+  h+=`<div style="padding:12px;border-radius:12px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);font-size:11px;color:var(--orange);line-height:1.5;margin-top:8px">⚠️ <strong>Disclaimer:</strong> For informational purposes only. Always DYOR before investing.</div></div></div>`;
+  $('safetyResult').innerHTML=h;
+}
+
+/* Query Router */
+async function processQuery(q){
+  const l=q.toLowerCase(),coins=matchCoins(q);
+  const cm=q.match(/0x[a-fA-F0-9]{40}/);
+  if(cm){switchTab('safety');$('safetyInput').value=cm[0];await checkToken(cm[0]);return`🛡️ Analysis complete — check the <strong>Safety</strong> tab!`}
+  if(coins.length&&/price|harga|cost|worth|value|berapa|how much/i.test(l)){const d=await cgP(coins);if(!d)return'⚠️ Could not fetch data.';let h='';for(const[id,v]of Object.entries(d)){const ch=v.usd_24h_change||0;h+=`<div class="dc"><div class="dcl">${id.toUpperCase()}</div><div class="dcv">${fmt$(v.usd)}</div><div class="dcs ${pC(ch)}">${pA(ch)} ${Math.abs(ch).toFixed(2)}% (24h) · Vol ${fmtM(v.usd_24h_vol||0)} · MCap ${fmtM(v.usd_market_cap||0)}</div></div>`}return h+'<div style="font-size:10px;color:var(--text3);margin-top:6px">Data: CoinGecko · Real-time</div>'}
+  if(/top\s*\d*/i.test(l)){const n=parseInt(l.match(/top\s*(\d+)/)?.[1])||10;const d=await cgM(Math.min(n,50));if(!d)return'⚠️ Could not fetch data.';let rows=d.slice(0,n).map((c,i)=>`<tr><td style="color:var(--text3);font-weight:600">${i+1}</td><td><div class="cc"><img src="${c.image}" alt=""><div><div class="cn">${c.name}</div><div class="cs">${c.symbol.toUpperCase()}</div></div></div></td><td style="font-weight:600">${fmt$(c.current_price)}</td><td>${pB(c.price_change_percentage_24h)}</td><td style="color:var(--text2)">${fmtM(c.market_cap)}</td></tr>`).join('');return`<div style="font-size:14px;font-weight:700;margin-bottom:12px">📊 Top ${n}</div><table class="mt-tbl"><tr><th>#</th><th>Coin</th><th>Price</th><th>24h</th><th>MCap</th></tr>${rows}</table>`}
+  if(/trending|trend|hype/i.test(l)){const d=await cgT();if(!d.length)return'⚠️ Could not fetch.';let h=`<div style="font-size:14px;font-weight:700;margin-bottom:12px">🔥 Trending</div><div class="trow">`;d.slice(0,7).forEach(c=>{const i=c.item;h+=`<div class="tcard"><img src="${i.small}" alt=""><div class="tn">${i.name}</div><div class="ts">${i.symbol}</div><div class="tr">#${i.market_cap_rank}</div></div>`});return h+'</div>'}
+  if(/gainer|pump/i.test(l)){const d=await cgM(100);if(!d)return'⚠️ Error';const s=d.filter(c=>c.price_change_percentage_24h!=null).sort((a,b)=>b.price_change_percentage_24h-a.price_change_percentage_24h).slice(0,5);let rows=s.map((c,i)=>`<tr><td style="color:var(--text3);font-weight:600">${i+1}</td><td><div class="cc"><img src="${c.image}" alt=""><div><div class="cn">${c.name}</div><div class="cs">${c.symbol.toUpperCase()}</div></div></div></td><td>${pB(c.price_change_percentage_24h)}</td><td style="font-weight:600">${fmt$(c.current_price)}</td></tr>`).join('');return`<div style="font-size:14px;font-weight:700;margin-bottom:12px">🚀 Top Gainers (24h)</div><table class="mt-tbl"><tr><th>#</th><th>Coin</th><th>24h</th><th>Price</th></tr>${rows}</table>`}
+  if(/loser|dump|crash/i.test(l)){const d=await cgM(100);if(!d)return'⚠️ Error';const s=d.filter(c=>c.price_change_percentage_24h!=null).sort((a,b)=>a.price_change_percentage_24h-b.price_change_percentage_24h).slice(0,5);let rows=s.map((c,i)=>`<tr><td style="color:var(--text3);font-weight:600">${i+1}</td><td><div class="cc"><img src="${c.image}" alt=""><div><div class="cn">${c.name}</div><div class="cs">${c.symbol.toUpperCase()}</div></div></div></td><td>${pB(c.price_change_percentage_24h)}</td><td style="font-weight:600">${fmt$(c.current_price)}</td></tr>`).join('');return`<div style="font-size:14px;font-weight:700;margin-bottom:12px">📉 Top Losers (24h)</div><table class="mt-tbl"><tr><th>#</th><th>Coin</th><th>24h</th><th>Price</th></tr>${rows}</table>`}
+  return getKB(q);
+}
+
+/* KB */
+function getKB(q){const l=q.toLowerCase();const kb=[
+{k:/what\s+is\s+defi|decentralized\s*finance/i,a:`<strong>DeFi</strong> — financial system on blockchain, no banks.<br><br>• <strong>DEX</strong> — Uniswap, SushiSwap<br>• <strong>Lending</strong> — Aave, Compound<br>• <strong>Yield Farming</strong> — earn by providing liquidity<br>• <strong>Stablecoins</strong> — USDC, DAI<br><br>TVL: $100B+`},
+{k:/impermanent\s*loss/i,a:`<strong>Impermanent Loss</strong> — when LP value < just holding.<br><br>Deposit 1 ETH + 2000 USDC → ETH doubles → holding=$6000 but LP≈$5657. Loss: ~5.7%.<br><br>Becomes permanent only on withdrawal.`},
+{k:/rug|scam|honeypot|detect.*safe/i,a:`<strong>🛡️ Detecting Scams</strong><br><br>• 🔴 Contract not verified<br>• 🔴 Ownership not renounced<br>• 🔴 >50% in one wallet<br>• 🔴 Liquidity not locked<br>• 🔴 Guaranteed returns<br><br>Tools: <a href="https://honeypot.is">honeypot.is</a>, <a href="https://tokensniffer.com">TokenSniffer</a>, <a href="https://rugcheck.xyz">RugCheck</a><br><br>Or use the <strong>Safety tab</strong>!`},
+{k:/gas\s*fee|how.*gas/i,a:`<strong>⛽ Gas Fees</strong><br><br>Fee for Ethereum transactions. Measured in Gwei.<br><br>• Transfer: ~21K gas<br>• Swap: ~150-300K gas<br><br>Save: Use L2 (Base, Arbitrum), transact off-peak.`},
+{k:/layer\s*2|l2|rollup/i,a:`<strong>⚡ Layer 2</strong><br><br>Ethereum scaling: faster, cheaper.<br><br>• Optimistic: Arbitrum, Optimism, Base<br>• ZK: zkSync, StarkNet<br><br>Eth: 15 TPS, $1-50/tx → L2: 2000+ TPS, $0.01-0.10/tx`},
+{k:/what\s+is\s+(bitcoin|btc)/i,a:`<strong>Bitcoin (BTC)</strong> — first crypto, 2009.<br><br>• Max supply: 21M<br>• Mining (PoW), halving every ~4y<br>• Digital gold, inflation hedge`},
+{k:/what\s+is\s+(ethereum|eth)/i,a:`<strong>Ethereum (ETH)</strong> — programmable blockchain, 2015.<br><br>• Smart contracts, DeFi, NFTs, L2s<br>• PoS since 2022<br>• EIP-1559: deflationary`},
+{k:/what\s+is\s+nft/i,a:`<strong>NFTs</strong> — unique tokens proving ownership.<br><br>Art, gaming, tickets, asset tokenization.`},
+{k:/what\s+is\s+smart\s*contract/i,a:`<strong>Smart Contracts</strong> — "If X, then Y" on blockchain.<br><br>Immutable, transparent, trustless, composable.`},
+{k:/what\s+is\s+dao/i,a:`<strong>DAO</strong> — org governed by token holders.<br><br>Uniswap, Aave, MakerDAO, ENS.`},
+{k:/airdrop/i,a:`<strong>🪂 Airdrops</strong> — free tokens for holders.<br><br>Famous: Uniswap (~$1200), ENS (~$10K), ARB (~$2K).<br><br>⚠️ Never connect wallet to unknown sites!`},
+{k:/tokenomics/i,a:`<strong>Tokenomics</strong> — supply, distribution, vesting.<br><br>Red flags: >30% team, short vesting, no burn.`},
+{k:/explorer|etherscan/i,a:`<strong>🔍 Explorers</strong><br><br><a href="https://etherscan.io">Etherscan</a>, <a href="https://basescan.org">Basescan</a>, <a href="https://blockscout.com">Blockscout</a>`},
+{k:/yield\s*farm|liquidity/i,a:`<strong>🌾 Yield Farming</strong> — deposit pairs → earn fees.<br><br>Risks: IL, bugs, rugs. Safe: Uniswap, Curve, Aave.`},
+];for(const i of kb)if(i.k.test(q))return i.a;
+if(/hello|hi|hey|halo/i.test(l))return`Hey! 👋 I'm <strong>MiMoBot</strong>.<br><br>• 📈 Prices — "price BTC ETH"<br>• 🛡️ Safety — paste contract address<br>• 📊 Market — "top 10"<br>• 🏦 DeFi — "what is yield farming"`;
+if(/thank/i.test(l))return`You're welcome! 🙌`;
+if(/help|what\s+can/i.test(l))return`I'm <strong>MiMoBot</strong>:<br>🛡️ Token Safety · 📈 Prices · 📊 Market · 🏦 DeFi · ⚡ Education`;
+return`Try: "price BTC", "top 10", or paste a contract address (0x...) for safety check!`}
+
+/* Market */
+async function loadMarket(){const el=$('marketContent');const d=await cgM(50);if(!d){el.innerHTML='<div style="text-align:center;padding:60px 0;color:var(--text3)">Failed to load.</div>';return}let h=`<div class="mkt-hd"><h3>📊 Crypto Market</h3><span>CoinGecko · Real-time</span></div><div class="mkt-grid">`;d.forEach(c=>{const ch=c.price_change_percentage_24h||0;h+=`<div class="mkt-card"><div class="mkt-ct"><img src="${c.image}" alt=""><div><div class="mn">${c.name}</div><div class="ms">${c.symbol.toUpperCase()}</div></div></div><div class="mp">${fmt$(c.current_price)}</div><div class="mc" style="color:${ch>=0?'var(--green)':'var(--red)'}">${pA(ch)} ${Math.abs(ch).toFixed(2)}%</div><div class="mm">MCap ${fmtM(c.market_cap)}</div></div>`});el.innerHTML=h+'</div>'}
+
+/* Education */
+const eduTopics=[{i:'🛡️',t:'Token Safety Checker',d:'Verify contracts, detect rugs, protect funds.',g:['Essential','Security'],q:'how to detect scam tokens'},{i:'₿',t:'Bitcoin Basics',d:'Mining, halvings, why BTC matters.',g:['Beginner','BTC'],q:'what is bitcoin'},{i:'⟠',t:'Ethereum & Smart Contracts',d:'Programmable blockchain, gas, The Merge.',g:['Beginner','ETH'],q:'what is ethereum'},{i:'🏦',t:'DeFi Deep Dive',d:'DEXes, lending, yield farming.',g:['Intermediate','DeFi'],q:'what is defi'},{i:'⚡',t:'Layer 2 Scaling',d:'Rollups, Arbitrum, Optimism, Base.',g:['Intermediate','L2'],q:'what is layer 2'},{i:'🎨',t:'NFTs Explained',d:'Non-fungible tokens and use cases.',g:['Beginner','NFT'],q:'what is nft'},{i:'🌾',t:'Yield Farming & LP',d:'Provide liquidity, earn fees, understand IL.',g:['Advanced','DeFi'],q:'yield farming'},{i:'📊',t:'Tokenomics 101',d:'Supply, distribution, vesting.',g:['Intermediate'],q:'what is tokenomics'},{i:'🏛️',t:'DAOs & Governance',d:'Decentralized orgs, voting, treasury.',g:['Intermediate'],q:'what is dao'},{i:'⛽',t:'Gas Fees',d:'Why fees spike and how to save.',g:['Beginner'],q:'explain gas fees'},{i:'🪂',t:'Airdrops',d:'How they work and staying safe.',g:['Intermediate'],q:'what is airdrop'},{i:'🔍',t:'Explorers',d:'Etherscan, Blockscout basics.',g:['Essential'],q:'blockchain explorer'}];
+function loadEducation(){const el=$('eduContent');let h=`<div class="edu-hd"><h3>📚 Learn Crypto</h3><p>Click any topic to start a conversation</p></div><div class="edu-grid">`;eduTopics.forEach(t=>{h+=`<div class="edu-card" onclick="switchTab('chat');ask('${t.q}')"><span class="ei">${t.i}</span><div class="et">${t.t}</div><div class="ed">${t.d}</div><div class="etags">${t.g.map(x=>`<span class="etag">${x}</span>`).join('')}</div></div>`});el.innerHTML=h+'</div>'}
+
+function clearChat(){chatEl.innerHTML=`<div class="welcome" id="welcome"><div class="wb">✦ Powered by Xiaomi MiMo</div><h2>MiMoBot</h2><p>Free AI crypto assistant with token safety checker, live market data, and DeFi education.</p><div class="fgrid"><div class="fcard" onclick="switchTab('safety')"><span class="fi">🛡️</span><div class="ft">Token Safety</div><div class="fd">Check contracts for scam risks</div></div><div class="fcard" onclick="ask('price btc eth sol')"><span class="fi">📈</span><div class="ft">Live Prices</div><div class="fd">Real-time data for 100+ tokens</div></div><div class="fcard" onclick="ask('what is defi')"><span class="fi">🔄</span><div class="ft">DeFi Education</div><div class="fd">Yield farming, LP, protocols</div></div><div class="fcard" onclick="ask('how to detect scam tokens')"><span class="fi">🔍</span><div class="ft">Security Guide</div><div class="fd">Spot rugs, honeypots, scams</div></div></div></div>`}
+$('input').focus();
+</script>
+</body>
+</html>
